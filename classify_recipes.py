@@ -13,6 +13,10 @@ def recipe():
 
 	recipe_list, unique_cuisines = build_list_of_recipes(rawData)
 
+	for i in xrange(0, np.size(unique_cuisines[0,0])):
+		print unique_cuisines[0,0][i]
+		print unique_cuisines[1,0][i]
+
 	unique_ingredients = build_unique_ingredients(recipe_list)
 
 def build_list_of_recipes(rawData):
@@ -30,6 +34,16 @@ def build_list_of_recipes(rawData):
 		cuisine_numpy[i] = recipe.cuisine
 
 	unique_cuisines = np.unique(cuisine_numpy)
+
+	cuisine_count = np.zeros((np.size(unique_cuisines),),dtype=np.int)
+
+	for i in xrange(0,np.size(rawData)):
+		temp_cuisine = recipe_list[i].cuisine
+
+		index = np.where(str(temp_cuisine) == unique_cuisines)[0][0]
+		cuisine_count[index] +=1
+
+	unique_cuisines = np.array([[unique_cuisines],[cuisine_count]])
 
 	return recipe_list, unique_cuisines
 
