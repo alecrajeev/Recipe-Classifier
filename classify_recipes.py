@@ -11,7 +11,7 @@ def recipe():
 	rawData = json.load(json_data)
 	json_data.close()
 
-	recipe_list = build_list_of_recipes(rawData)
+	recipe_list, unique_cuisines = build_list_of_recipes(rawData)
 
 	unique_ingredients = build_unique_ingredients(recipe_list)
 
@@ -19,12 +19,19 @@ def build_list_of_recipes(rawData):
 
 	recipe_list = []
 
+	dt_str = np.dtype(('U',15))
+
+	cuisine_numpy = np.zeros((np.size(rawData),),dtype=dt_str)
+
 	for i in xrange(0,np.size(rawData)):
 		r = rawData[i]
 		recipe = Recipe(r["cuisine"],r["id"],np.array(r["ingredients"]))
 		recipe_list.append(recipe)
+		cuisine_numpy[i] = recipe.cuisine
 
-	return recipe_list
+	unique_cuisines = np.unique(cuisine_numpy)
+
+	return recipe_list, unique_cuisines
 
 
 def build_unique_ingredients(recipe_list):
