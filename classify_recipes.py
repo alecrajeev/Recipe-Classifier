@@ -11,13 +11,21 @@ def recipe():
 	rawData = json.load(json_data)
 	json_data.close()
 
+	number_of_tuples = np.size(rawData)*1.0
+
+	print number_of_tuples
+
 	recipe_list, unique_cuisines = build_list_of_recipes(rawData)
 
-	for i in xrange(0, np.size(unique_cuisines[0,0])):
-		print unique_cuisines[0,0][i]
-		print unique_cuisines[1,0][i]
+	for i in xrange(0, np.size(recipe_list)):
+		print find_count(recipe_list[i].cuisine,unique_cuisines)/number_of_tuples
 
 	unique_ingredients = build_unique_ingredients(recipe_list)
+
+def find_count_of_cuisine(cuisine, unique_cuisines):
+	index = np.where(str(cuisine) == unique_cuisines[0])
+
+	return unique_cuisines[1][index][0]
 
 def build_list_of_recipes(rawData):
 
@@ -43,7 +51,7 @@ def build_list_of_recipes(rawData):
 		index = np.where(str(temp_cuisine) == unique_cuisines)[0][0]
 		cuisine_count[index] +=1
 
-	unique_cuisines = np.array([[unique_cuisines],[cuisine_count]])
+	unique_cuisines = [unique_cuisines,cuisine_count]
 
 	return recipe_list, unique_cuisines
 
