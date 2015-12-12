@@ -18,31 +18,41 @@ def recipe():
 
 	unique_ingredients = build_unique_ingredients(recipe_list)
 
-	print np.size(unique_ingredients)
-
 	H = HashTable(np.size(unique_ingredients))
 
 	collision_count = 0
+	A = []
 
 	for i in xrange(0, np.size(unique_ingredients)):
 		collision_count += H.put(unique_ingredients[i],i)
 
-	print "collision count: " + str(collision_count)
+	if collision_count > 0:
+		print "problem with collisions"
 
+	ingredients_count = np.zeros((np.size(unique_cuisines[0]),np.size(unique_ingredients)), dtype=np.int)
 
-	# ingredients_count = np.zeros((np.size(unique_cuisines[0]),np.size(unique_ingredients)), dtype=np.int)
+	for i in xrange(0, np.size(recipe_list)):
+		recipe = recipe_list[i]
+		cuisine_index = get_cuisine_index(recipe.cuisine, unique_cuisines)
+		ingredients_array = np.array(recipe.ingredients)
 
+		for j in xrange(0, np.size(ingredients_array)):
+			ingredient_index = H.get(ingredients_array[j])
+			ingredients_count[cuisine_index][ingredient_index] += 1
+
+def get_cuisine_index(cuisine, unique_cuisines):
+	return np.where(str(cuisine) == unique_cuisines[0])[0][0]
 
 def find_count_of_cuisine(cuisine, unique_cuisines):
-	index = np.where(str(cuisine) == unique_cuisines[0])
+	index = get_cuisine_index(cuisine,unique_cuisines)
 
-	return unique_cuisines[1][index][0]*1.0
+	return unique_cuisines[1][index]*1.0
 
 def build_list_of_recipes(rawData):
 
 	recipe_list = []
 
-	dt_str = np.dtype(('U',15))
+	dt_str = np.dtype(('U',30))
 
 	cuisine_numpy = np.zeros((np.size(rawData),),dtype=dt_str)
 
@@ -73,7 +83,7 @@ def build_unique_ingredients(recipe_list):
 	for i in xrange(0,np.size(recipe_list)):
 		ingredients_total += np.size(recipe_list[i].ingredients)
 
-	dt_str = np.dtype(('U',30))
+	dt_str = np.dtype(('U',75))
 
 	ingredients_numpy = np.zeros((ingredients_total,),dtype=dt_str)
 

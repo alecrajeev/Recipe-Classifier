@@ -4,12 +4,13 @@ class HashTable(object):
 	def __init__(self,table_size):
 		self.size = table_size
 		self.index_table = np.full(self.size, -1,dtype=np.int)
-		self.key_table = np.full(self.size,"empty", dtype=np.dtype(('U',30)))
+		self.key_table = np.full(self.size,"empty", dtype=np.dtype(('U',75)))
 
 	def put(self,key,value):
 		index_of_hash_table = self.hash_function(key)
 
-		while (self.key_table[index_of_hash_table] != "empty"):
+		# handle collisions with linear probing
+		while self.key_table[index_of_hash_table] != "empty":
 			index_of_hash_table = (index_of_hash_table + 1) % self.size
 
 		# if there is a value already stored return -1
@@ -21,11 +22,21 @@ class HashTable(object):
 			return 0
 
 	def get(self,key):
+
 		index_of_hash_table = self.hash_function(key)
+
+		check_count = 0
+
+		while self.key_table[index_of_hash_table] != key:
+			if check_count > self.size:
+				"print ingredient not in training set"
+				return -1
+			index_of_hash_table = (index_of_hash_table + 1) % self.size
 
 		return self.index_table[index_of_hash_table]
 
 	def hash_function(self,key):
+
 		key_sum = 0
 
 		for i in xrange(0, len(key)):
