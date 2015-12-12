@@ -2,6 +2,7 @@ import numpy as np
 import json
 import pprint
 from Recipe import Recipe
+from HashTable import HashTable
 
 def recipe():
 
@@ -13,19 +14,29 @@ def recipe():
 
 	number_of_tuples = np.size(rawData)*1.0
 
-	print number_of_tuples
-
 	recipe_list, unique_cuisines = build_list_of_recipes(rawData)
 
-	for i in xrange(0, np.size(recipe_list)):
-		print find_count(recipe_list[i].cuisine,unique_cuisines)/number_of_tuples
-
 	unique_ingredients = build_unique_ingredients(recipe_list)
+
+	print np.size(unique_ingredients)
+
+	H = HashTable(np.size(unique_ingredients))
+
+	collision_count = 0
+
+	for i in xrange(0, np.size(unique_ingredients)):
+		collision_count += H.put(unique_ingredients[i],i)
+
+	print "collision count: " + str(collision_count)
+
+
+	# ingredients_count = np.zeros((np.size(unique_cuisines[0]),np.size(unique_ingredients)), dtype=np.int)
+
 
 def find_count_of_cuisine(cuisine, unique_cuisines):
 	index = np.where(str(cuisine) == unique_cuisines[0])
 
-	return unique_cuisines[1][index][0]
+	return unique_cuisines[1][index][0]*1.0
 
 def build_list_of_recipes(rawData):
 
