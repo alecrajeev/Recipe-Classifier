@@ -11,7 +11,7 @@ class HashTable(object):
     def put(self, key, value):
         index_of_hash_table = self.hash_function(key)
 
-        node = Node(key, index_of_hash_table, value)
+        node = Node(key, value)
 
         temp = self.table[index_of_hash_table]
         if temp is None:
@@ -38,24 +38,20 @@ class HashTable(object):
         if node.key == key:
             return node.value
 
-        print "problem"
-        return -1
-
     def hash_function(self, key):
 
-        key_sum = 0
+        key_index = 0
 
         for i in xrange(0, len(key)):
-            key_sum += ord(key[i])
+            key_index += ord(key[i])
 
-        key_sum *= ord(key[0])
-        key_sum *= ord(key[len(key) - 1])
-        key_sum /= ord(key[len(key) / 2])
+        key_index *= ord(key[0])
+        key_index *= ord(key[len(key) - 1])
+        key_index /= ord(key[len(key) / 2])
 
-        key_sum = key_sum % self.size
+        key_index = key_index % self.size
 
-        if key_sum < 0:
-            print "less than zero"
-            key_sum += self.size
+        if key_index < 0:
+            key_index += self.size
 
-        return key_sum
+        return key_index
