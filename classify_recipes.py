@@ -1,27 +1,54 @@
 import numpy as np
 import json
 import pprint
-from Recipe import Recipe
+from TrainRecipe import TrainRecipe
+from TestRecipe import TestRecipe
 from HashTable import HashTable
 
 def recipe():
 
-	json_file = "./train.json"
-	json_data = open(json_file)
+	train_data = import_train_data()
 
-	rawData = json.load(json_data)
-	json_data.close()
+	number_of_tuples = np.size(train_data)*1.0
 
-	number_of_tuples = np.size(rawData)*1.0
-
-	recipe_list, unique_cuisines = build_list_of_recipes(rawData)
+	recipe_list, unique_cuisines = build_list_of_recipes(train_data)
 
 	unique_ingredients = build_unique_ingredients(recipe_list)
 
 	hash_table = build_hash_table(unique_ingredients)
 
 	ingredients_count = build_ingredients_count(recipe_list,unique_cuisines, unique_ingredients, hash_table)
-	print "built ingredients count"
+
+	test_data = import_test_data()
+
+	test_recipe_list = []
+
+	for i in xrange(0, np.size(test_data)):
+		test = test_data[i]
+		recipe = TestRecipe(test_data[i]["id"],np.array(test_data[i]["ingredients"]))
+		test_recipe_list.append(recipe)
+
+	# cycle through every test tuple
+	for i in xrange(0, np.size(test_recipe_list)):
+		test_recipe = test_recipe_list[i]
+		# cycle through every cuisine
+		for cuisine_index in xrange(0, np.size(unique_cuisines[0])):
+			prod = 1.0
+			# cycle through every ingredient in tuple for every cuisine
+			for k in xrange(0, np.size(test_recipe.ingredients)):
+				ingredient_index = hash_table.get(test_recipe.ingredients[k])
+				# if ingredient_index == -1, then the ingredient wasn't in the training data
+				if ingredient_index > -1:
+					prod *= get_probability_of_ingredient(cuisine_index, ingredient_index, ingredients_count, unique_cuisines)
+
+			test_recipe.cuisine_probabilities[cuisine_index] = prod
+
+		cuisine_index_of_max = np.argmax(test_recipe.cuisine_probabilities)
+		test_recipe.cuisine = unique_cuisines[0][cuisine_index_of_max]
+
+	print "id,cuisine"
+	for i in xrange(0, np.size(test_recipe_list)):
+		print str(test_recipe_list[i].id) + "," + str(test_recipe_list[i].cuisine)
 
 
 def get_cuisine_index(cuisine, unique_cuisines):
@@ -31,6 +58,14 @@ def find_count_of_cuisine(cuisine, unique_cuisines):
 	index = get_cuisine_index(cuisine,unique_cuisines)
 
 	return unique_cuisines[1][index]*1.0
+
+def get_probability_of_ingredient(cuisine_index, ingredient_index, ingredients_count, unique_cuisines):
+	ccount = unique_cuisines[1][cuisine_index]
+
+	# the add one is the Laplacian correction
+	icount = ingredients_count[cuisine_index][ingredient_index] + 1.0
+
+	return icount/ccount
 
 def build_ingredients_count(recipe_list, unique_cuisines, unique_ingredients, hash_table):
 	ingredients_count = np.zeros((np.size(unique_cuisines[0]),np.size(unique_ingredients)), dtype=np.int)
@@ -60,17 +95,17 @@ def build_hash_table(unique_ingredients):
 
 	return hash_table
 
-def build_list_of_recipes(rawData):
+def build_list_of_recipes(train_data):
 
 	recipe_list = []
 
 	dt_str = np.dtype(('U',30))
 
-	cuisine_numpy = np.zeros((np.size(rawData),),dtype=dt_str)
+	cuisine_numpy = np.zeros((np.size(train_data),),dtype=dt_str)
 
-	for i in xrange(0,np.size(rawData)):
-		r = rawData[i]
-		recipe = Recipe(r["cuisine"],r["id"],np.array(r["ingredients"]))
+	for i in xrange(0,np.size(train_data)):
+		r = train_data[i]
+		recipe = TrainRecipe(r["cuisine"],r["id"],np.array(r["ingredients"]))
 		recipe_list.append(recipe)
 		cuisine_numpy[i] = recipe.cuisine
 
@@ -78,7 +113,7 @@ def build_list_of_recipes(rawData):
 
 	cuisine_count = np.zeros((np.size(unique_cuisines),),dtype=np.int)
 
-	for i in xrange(0,np.size(rawData)):
+	for i in xrange(0,np.size(train_data)):
 		temp_cuisine = recipe_list[i].cuisine
 
 		index = np.where(str(temp_cuisine) == unique_cuisines)[0][0]
@@ -108,6 +143,24 @@ def build_unique_ingredients(recipe_list):
 	unique_ingredients = np.unique(ingredients_numpy)
 
 	return unique_ingredients
+
+def import_test_data():
+	json_file = "./test.json"
+	json_data = open(json_file)
+
+	test_data = json.load(json_data)
+	json_data.close()
+
+	return test_data
+
+def import_train_data():
+	json_file = "./train.json"
+	json_data = open(json_file)
+
+	train_data = json.load(json_data)
+	json_data.close()
+
+	return train_data
 
 def main():
 	recipe()

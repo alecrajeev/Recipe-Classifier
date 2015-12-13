@@ -21,7 +21,6 @@ class HashTable(object):
 		index_of_hash_table = self.hash_function(key)
 
 		if self.table[index_of_hash_table] == None:
-			print "ingredient isn't in training"
 			return -1
 
 		# handles collisions with separate chaining
@@ -31,6 +30,8 @@ class HashTable(object):
 
 		while node.key != key:
 			node = node.next
+			if node == None:
+				return -1
 
 		if node.key == key:
 			return node.value
