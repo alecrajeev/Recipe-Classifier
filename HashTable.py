@@ -1,39 +1,42 @@
 import numpy as np
+from Node import Node
 
 class HashTable(object):
 	def __init__(self,table_size):
 		self.size = table_size
-		self.index_table = np.full(self.size, -1,dtype=np.int)
-		self.key_table = np.full(self.size,"empty", dtype=np.dtype(('U',75)))
+		self.table = [None]*table_size
 
 	def put(self,key,value):
 		index_of_hash_table = self.hash_function(key)
 
-		# handle collisions with linear probing
-		while self.key_table[index_of_hash_table] != "empty":
-			index_of_hash_table = (index_of_hash_table + 1) % self.size
+		node = Node(key,index_of_hash_table,value)
 
-		# if there is a value already stored return -1
-		if self.index_table[index_of_hash_table] != -1:
-			return 1
-		else: # without a value previously stored return 0
-			self.index_table[index_of_hash_table] = value
-			self.key_table[index_of_hash_table] = key
-			return 0
+		temp = self.table[index_of_hash_table]
+		if temp == None:
+			self.table[index_of_hash_table] = node
+		else:
+			temp.add_node(node)
 
 	def get(self,key):
-
 		index_of_hash_table = self.hash_function(key)
 
-		check_count = 0
+		if self.table[index_of_hash_table] == None:
+			print "ingredient isn't in training"
+			return -1
 
-		while self.key_table[index_of_hash_table] != key:
-			if check_count > self.size:
-				"print ingredient not in training set"
-				return -1
-			index_of_hash_table = (index_of_hash_table + 1) % self.size
+		# handles collisions with separate chaining
+		node = self.table[index_of_hash_table]
+		if node.key == key:
+			return node.value
 
-		return self.index_table[index_of_hash_table]
+		while node.key != key:
+			node = node.next
+
+		if node.key == key:
+			return node.value
+
+		print "problem"
+		return -1
 
 	def hash_function(self,key):
 

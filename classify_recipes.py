@@ -18,27 +18,11 @@ def recipe():
 
 	unique_ingredients = build_unique_ingredients(recipe_list)
 
-	H = HashTable(np.size(unique_ingredients))
+	hash_table = build_hash_table(unique_ingredients)
 
-	collision_count = 0
-	A = []
+	ingredients_count = build_ingredients_count(recipe_list,unique_cuisines, unique_ingredients, hash_table)
+	print "built ingredients count"
 
-	for i in xrange(0, np.size(unique_ingredients)):
-		collision_count += H.put(unique_ingredients[i],i)
-
-	if collision_count > 0:
-		print "problem with collisions"
-
-	ingredients_count = np.zeros((np.size(unique_cuisines[0]),np.size(unique_ingredients)), dtype=np.int)
-
-	for i in xrange(0, np.size(recipe_list)):
-		recipe = recipe_list[i]
-		cuisine_index = get_cuisine_index(recipe.cuisine, unique_cuisines)
-		ingredients_array = np.array(recipe.ingredients)
-
-		for j in xrange(0, np.size(ingredients_array)):
-			ingredient_index = H.get(ingredients_array[j])
-			ingredients_count[cuisine_index][ingredient_index] += 1
 
 def get_cuisine_index(cuisine, unique_cuisines):
 	return np.where(str(cuisine) == unique_cuisines[0])[0][0]
@@ -47,6 +31,34 @@ def find_count_of_cuisine(cuisine, unique_cuisines):
 	index = get_cuisine_index(cuisine,unique_cuisines)
 
 	return unique_cuisines[1][index]*1.0
+
+def build_ingredients_count(recipe_list, unique_cuisines, unique_ingredients, hash_table):
+	ingredients_count = np.zeros((np.size(unique_cuisines[0]),np.size(unique_ingredients)), dtype=np.int)
+
+	for i in xrange(0, np.size(recipe_list)):
+		recipe = recipe_list[i]
+		cuisine_index = get_cuisine_index(recipe.cuisine, unique_cuisines)
+		ingredients_array = np.array(recipe.ingredients)
+
+		for j in xrange(0, np.size(ingredients_array)):
+			ingredient_index = hash_table.get(ingredients_array[j])
+			ingredients_count[cuisine_index][ingredient_index] += 1
+
+	return ingredients_count
+
+def build_hash_table(unique_ingredients):
+	hash_table = HashTable(np.size(unique_ingredients))
+
+	collision_count = 0
+	A = []
+
+	for i in xrange(0, np.size(unique_ingredients)):
+		hash_table.put(unique_ingredients[i],i)
+
+	# if collision_count > 0:
+	# 	print "problem with collisions"
+
+	return hash_table
 
 def build_list_of_recipes(rawData):
 
