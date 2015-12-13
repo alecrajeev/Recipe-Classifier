@@ -21,35 +21,11 @@ def recipe():
 
 	test_data = import_test_data()
 
-	test_recipe_list = []
+	test_recipe_list = build_test_recipe_list(test_data)
 
-	for i in xrange(0, np.size(test_data)):
-		test = test_data[i]
-		recipe = TestRecipe(test_data[i]["id"],np.array(test_data[i]["ingredients"]))
-		test_recipe_list.append(recipe)
+	bayes_classifier_algorith(test_recipe_list, hash_table, unique_cuisines, ingredients_count, number_of_tuples)
 
-	# cycle through every test tuple
-	for i in xrange(0, np.size(test_recipe_list)):
-		test_recipe = test_recipe_list[i]
-		# cycle through every cuisine
-		for cuisine_index in xrange(0, np.size(unique_cuisines[0])):
-			prod = 1.0
-			# cycle through every ingredient in tuple for every cuisine
-			for k in xrange(0, np.size(test_recipe.ingredients)):
-				ingredient_index = hash_table.get(test_recipe.ingredients[k])
-				# if ingredient_index == -1, then the ingredient wasn't in the training data
-				if ingredient_index > -1:
-					prod *= get_probability_of_ingredient(cuisine_index, ingredient_index, ingredients_count, unique_cuisines)
-
-			test_recipe.cuisine_probabilities[cuisine_index] = prod
-
-		cuisine_index_of_max = np.argmax(test_recipe.cuisine_probabilities)
-		test_recipe.cuisine = unique_cuisines[0][cuisine_index_of_max]
-
-	print "id,cuisine"
-	for i in xrange(0, np.size(test_recipe_list)):
-		print str(test_recipe_list[i].id) + "," + str(test_recipe_list[i].cuisine)
-
+	print_classified_cuisines(test_recipe_list)
 
 def get_cuisine_index(cuisine, unique_cuisines):
 	return np.where(str(cuisine) == unique_cuisines[0])[0][0]
@@ -66,6 +42,46 @@ def get_probability_of_ingredient(cuisine_index, ingredient_index, ingredients_c
 	icount = ingredients_count[cuisine_index][ingredient_index] + 1.0
 
 	return icount/ccount
+
+def get_probability_of_cuisine(cuisine_index, unique_cuisines, number_of_tuples):
+	ccount = unique_cuisines[1][cuisine_index]*1.0
+
+	return ccount/number_of_tuples
+
+def print_classified_cuisines(test_recipe_list):
+	print "id,cuisine"
+	for i in xrange(0, np.size(test_recipe_list)):
+		print str(test_recipe_list[i].id) + "," + str(test_recipe_list[i].cuisine)
+
+
+def bayes_classifier_algorith(test_recipe_list, hash_table, unique_cuisines, ingredients_count, number_of_tuples):
+	# cycle through every test tuple
+	for i in xrange(0, np.size(test_recipe_list)):
+		test_recipe = test_recipe_list[i]
+		# cycle through every cuisine
+		for cuisine_index in xrange(0, np.size(unique_cuisines[0])):
+			prod = 1.0
+			# cycle through every ingredient in tuple for every cuisine
+			for k in xrange(0, np.size(test_recipe.ingredients)):
+				ingredient_index = hash_table.get(test_recipe.ingredients[k])
+				# if ingredient_index == -1 then the ingredient wasn't in the training data, so ignore
+				if ingredient_index > -1:
+					prod *= get_probability_of_ingredient(cuisine_index, ingredient_index, ingredients_count, unique_cuisines)
+
+			test_recipe.cuisine_probabilities[cuisine_index] = prod*get_probability_of_cuisine(cuisine_index, unique_cuisines, number_of_tuples)
+
+		cuisine_index_of_max = np.argmax(test_recipe.cuisine_probabilities)
+		test_recipe.cuisine = unique_cuisines[0][cuisine_index_of_max]
+
+def build_test_recipe_list(test_data):
+	test_recipe_list = []
+
+	for i in xrange(0, np.size(test_data)):
+		test = test_data[i]
+		recipe = TestRecipe(test_data[i]["id"],np.array(test_data[i]["ingredients"]))
+		test_recipe_list.append(recipe)
+
+	return test_recipe_list
 
 def build_ingredients_count(recipe_list, unique_cuisines, unique_ingredients, hash_table):
 	ingredients_count = np.zeros((np.size(unique_cuisines[0]),np.size(unique_ingredients)), dtype=np.int)
