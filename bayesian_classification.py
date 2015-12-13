@@ -11,6 +11,7 @@ class_name_json = "cuisine"
 attribute_name_json = "ingredients"
 id_name_json = "id"
 
+
 def classify():
 
     train_data = import_train_data()
@@ -51,7 +52,7 @@ def get_probability_of_attribute(
         unique_classes):
     class_count = unique_classes[1][class_index]
 
-    # the add one is the Laplacian correction
+    # The Laplacian correction is used here by adding 1.0
     attribute_count = attributes_counts[class_index][attribute_index] + 1.0
 
     return attribute_count / class_count
@@ -69,9 +70,11 @@ def get_probability_of_class_label(
 def print_class_labels_from_test(test_tuple_list):
     print class_name_json + "," + attribute_name_json
     for i in xrange(0, np.size(test_tuple_list)):
-        tuple_id = test_tuple_list[i].id
-        tuple_class = test_tuple_list[i].class_label
-        print str(tuple_id) + "," + str(tuple_class)
+        tuple_id = str(test_tuple_list[i].id)
+        tuple_class = str(test_tuple_list[i].class_label)
+        comma = ","
+        sequence = (tuple_id, tuple_class)
+        print comma.join(sequence)
 
 
 def bayes_classifier_algorith(
