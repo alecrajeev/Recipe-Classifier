@@ -1,59 +1,61 @@
 import numpy as np
 from Node import Node
 
+
 class HashTable(object):
-	def __init__(self,table_size):
-		self.size = table_size
-		self.table = [None]*table_size
 
-	def put(self,key,value):
-		index_of_hash_table = self.hash_function(key)
+    def __init__(self, table_size):
+        self.size = table_size
+        self.table = [None] * table_size
 
-		node = Node(key,index_of_hash_table,value)
+    def put(self, key, value):
+        index_of_hash_table = self.hash_function(key)
 
-		temp = self.table[index_of_hash_table]
-		if temp == None:
-			self.table[index_of_hash_table] = node
-		else:
-			temp.add_node(node)
+        node = Node(key, index_of_hash_table, value)
 
-	def get(self,key):
-		index_of_hash_table = self.hash_function(key)
+        temp = self.table[index_of_hash_table]
+        if temp is None:
+            self.table[index_of_hash_table] = node
+        else:
+            temp.add_node(node)
 
-		if self.table[index_of_hash_table] == None:
-			return -1
+    def get(self, key):
+        index_of_hash_table = self.hash_function(key)
 
-		# handles collisions with separate chaining
-		node = self.table[index_of_hash_table]
-		if node.key == key:
-			return node.value
+        if self.table[index_of_hash_table] is None:
+            return -1
 
-		while node.key != key:
-			node = node.next
-			if node == None:
-				return -1
+        # handles collisions with separate chaining
+        node = self.table[index_of_hash_table]
+        if node.key == key:
+            return node.value
 
-		if node.key == key:
-			return node.value
+        while node.key != key:
+            node = node.next
+            if node is None:
+                return -1
 
-		print "problem"
-		return -1
+        if node.key == key:
+            return node.value
 
-	def hash_function(self,key):
+        print "problem"
+        return -1
 
-		key_sum = 0
+    def hash_function(self, key):
 
-		for i in xrange(0, len(key)):
-			key_sum += ord(key[i])
+        key_sum = 0
 
-		key_sum *= ord(key[0])
-		key_sum *= ord(key[len(key)-1])
-		key_sum /= ord(key[len(key)/2])
+        for i in xrange(0, len(key)):
+            key_sum += ord(key[i])
 
-		key_sum = key_sum % self.size
+        key_sum *= ord(key[0])
+        key_sum *= ord(key[len(key) - 1])
+        key_sum /= ord(key[len(key) / 2])
 
-		if key_sum < 0:
-			print "less than zero"
-			key_sum += self.size
+        key_sum = key_sum % self.size
 
-		return key_sum
+        if key_sum < 0:
+            print "less than zero"
+            key_sum += self.size
+
+        return key_sum
